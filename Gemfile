@@ -24,6 +24,7 @@ group :assets do
 end
 
 gem 'jquery-rails'
+gem 'ransack'
 
 # Use unicorn as the web server
 # gem 'unicorn'
