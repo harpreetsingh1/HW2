@@ -6,7 +6,6 @@ class AddMoreMovies < ActiveRecord::Migration
     {:title => '300', :rating => 'PG-13', :release_date => '13-Aug-2007'},
     {:title => 'Titanic', :rating => 'PG-13', :release_date => '15-Jan-1995'},
     {:title => 'Iron Man', :rating => 'R', :release_date => '19-Apr-2009'},
-
   ]
   def up
     Movie.delete_all
