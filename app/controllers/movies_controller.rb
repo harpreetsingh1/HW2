@@ -1,30 +1,33 @@
 class MoviesController < ApplicationController
 
-  def show
+   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
     # will render app/views/movies/show.<extension> by default
   end
 
   def index
-     session[:params] ||= {}
-    old = session[:params]
+    sort = params[:sort] || session[:sort]
+    case sort
+    when 'title'
+      ordering,@title_header = {:order => :title}, 'hilite'
+    when 'release_date'
+      ordering,@date_header = {:order => :release_date}, 'hilite'
+    end
+    @all_ratings = Movie.all_ratings
+    @selected_ratings = params[:ratings] || session[:ratings] || {}
 
-    redirect_to movies_path({:q => old[:q], :ratings => old[:ratings]}) if (params[:q].blank? && old[:q].present?) || (params[:ratings].blank? && old[:ratings].present?)
+    if params[:sort] != session[:sort]
+      session[:sort] = sort
+      redirect_to :sort => sort, :ratings => @selected_ratings and return
+    end
 
-    params[:q] = old[:q] if params[:q].nil?
-    params[:ratings] = old[:ratings] if params[:ratings].nil?
-
-    session[:params] = {:q => params[:q], :ratings => params[:ratings]}
-    params = session[:params]
-
-    @all_ratings = Movie::RATINGS
-
-    movie = Movie
-    movie = movie.where('rating in (?)', params[:ratings].keys) if params[:ratings]
-
-    @q = movie.search(params[:q])
-    @movies = @q.result(:distinct => true)
+    if params[:ratings] != session[:ratings] and @selected_ratings != {}
+      session[:sort] = sort
+      session[:ratings] = @selected_ratings
+      redirect_to :sort => sort, :ratings => @selected_ratings and return
+    end
+    @movies = Movie.find_all_by_rating(@selected_ratings.keys, ordering)
   end
 
   def new
